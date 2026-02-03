@@ -1,0 +1,113 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Controls */
+.controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#startBtn {
+    background-color: #22c55e;
+    color: black;
+}
+
+#stopBtn {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* Video */
+.video-box {
+    position: relative;
+    background: #020617;
+    border-radius: 10px;
+    min-height: 360px; /* placeholder height */
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+#videoFeed {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    z-index: 10;
+}
+
+.video-placeholder {
+    position: absolute;
+    opacity: 0.6;
+    font-size: 14px;
+    z-index: 0;
+}
+
+/* Metrics */
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.metric {
+    background: #020617;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.metric span {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+.metric p {
+    font-size: 26px;
+    margin: 8px 0 0 0;
+}
+
+/* Debug */
+.debug {
+    background: #020617;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.debug h3 {
+    margin-top: 0;
+}
+
+pre {
+    font-size: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+}

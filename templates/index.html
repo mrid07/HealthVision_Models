@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>rPPG Realtime Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Realtime rPPG Monitoring</h1>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="stopBtn">Stop</button>
+    </div>
+
+    <!-- Video -->
+    <div class="video-box">
+        <img id="videoFeed" src="" alt="Camera Feed (optional)">
+        <div class="video-placeholder">
+            Camera feed handled by backend (producer)
+        </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics">
+        <div class="metric"><span>HR</span><p id="hr">--</p></div>
+        <div class="metric"><span>RR</span><p id="rr">--</p></div>
+        <div class="metric"><span>BP (Sys/Dia)</span><p id="bp">--/--</p></div>
+        <div class="metric"><span>SQI</span><p id="sqi">--</p></div>
+    </div>
+    
+    <div class="analysis">
+        <div class="metric"><span>Stress</span><p id="stress_label">--</p></div>
+        <div class="metric"><span>Calmness</span><p id="calmness">--</p></div>
+    </div>
+
+    <!-- Debug -->
+    <div class="debug">
+        <h3>Debug State</h3>
+        <pre id="debugBox">Waiting for data...</pre>
+    </div>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
