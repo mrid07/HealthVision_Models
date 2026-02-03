@@ -42,6 +42,14 @@ button {
     color: white;
 }
 
+.feedback {
+    text-align: center;
+    margin-bottom: 20px;
+    min-height: 24px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
 /* Video */
 .video-box {
     position: relative;

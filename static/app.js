@@ -3,6 +3,7 @@ const videoFeed = document.getElementById("videoFeed");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const nameInput = document.getElementById("userName");
+const feedback = document.getElementById("feedback");
 
 // --- Charts Initialization ---
 const MAX_POINTS = 60; // Keep last 60 points
@@ -98,6 +99,8 @@ startBtn.onclick = async () => {
         return;
     }
 
+    setFeedback("Starting session...", "yellow");
+
     try {
         const res = await fetch("/start", { 
             method: "POST",
@@ -107,6 +110,8 @@ startBtn.onclick = async () => {
         const data = await res.json();
         console.log(data);
         
+        setFeedback(`Session started for ${user}`, "green");
+
         // Start video feed
         videoFeed.src = "/video_feed";
         
@@ -118,15 +123,19 @@ startBtn.onclick = async () => {
         
     } catch (e) {
         console.error("Error starting:", e);
+        setFeedback("Error starting session", "red");
     }
 };
 
 stopBtn.onclick = async () => {
+    setFeedback("Stopping session...", "yellow");
     try {
         const res = await fetch("/stop", { method: "POST" });
         const data = await res.json();
         console.log(data);
         
+        setFeedback("Session stopped", "red");
+
         // Stop video feed (remove src to stop requests)
         videoFeed.src = "";
         
@@ -134,7 +143,13 @@ stopBtn.onclick = async () => {
         
     } catch (e) {
         console.error("Error stopping:", e);
+        setFeedback("Error stopping session", "red");
     }
+}
+
+function setFeedback(msg, color) {
+    feedback.innerText = msg;
+    feedback.style.color = color === "green" ? "#22c55e" : (color === "red" ? "#ef4444" : "#facc15");
 }
 
 function startPolling() {
