@@ -2,6 +2,8 @@
 import time
 import numpy as np
 import traceback
+import csv
+import os
 import engine.state as state
 from engine.processing_utils import (
     compute_sqi,
@@ -125,6 +127,26 @@ def processing_loop():
                         "sdnn": round(float(sdnn), 1) if sdnn else 0.0
                     })
                 
+                # Log to CSV
+                if state.session_dir:
+                    csv_path = os.path.join(state.session_dir, "metrics.csv")
+                    file_exists = os.path.isfile(csv_path)
+                    with open(csv_path, 'a', newline='') as f:
+                        writer = csv.writer(f)
+                        if not file_exists:
+                            writer.writerow(["Timestamp", "HR", "RR", "Sys", "Dia", "SQI", "Stress", "Calmness"])
+                        
+                        writer.writerow([
+                            t_latest,
+                            state.current_data["hr"],
+                            state.current_data["rr"],
+                            state.current_data["sys"],
+                            state.current_data["dia"],
+                            state.current_data["sqi"],
+                            state.current_data["stress_label"],
+                            state.current_data["calmness_score"]
+                        ])
+
                 print(f"[Processor] Updated: HR={hr_val:.1f}, SQI={fn_sqi:.2f}, FPS={fs_est:.1f}")
 
         except Exception as e:

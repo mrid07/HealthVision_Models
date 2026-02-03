@@ -39,3 +39,8 @@ current_data = {
 
 # History for HRV calculation (Processor usage)
 hr_history = deque(maxlen=300) # Store recent HR values for HRV calc
+
+# --- SESSION STATE ---
+user_name = None
+session_start_time = None
+session_dir = None

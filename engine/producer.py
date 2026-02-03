@@ -2,6 +2,7 @@
 import cv2
 import numpy as np
 import time
+import os
 import engine.state as state
 from engine.state import lock
 
@@ -11,6 +12,13 @@ def frame_producer(video_source=0):
     if not cap.isOpened():
         print("[Producer] Error opening video source.")
         return
+
+    # Video Recorder Setup
+    video_writer = None
+    video_path = None
+    if state.session_dir:
+        video_path = os.path.join(state.session_dir, "video.mp4")
+        # Defer initialization until we know frame size
 
     # Face detector
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -98,12 +106,29 @@ def frame_producer(video_source=0):
                 if len(state.roi_signal) > 0:
                     val = state.roi_signal[-1]
                     state.roi_signal.append(val)
-                    state.time_buffer.append(t)
-                else:
-                    state.roi_signal.append(0.0)
-                    state.time_buffer.append(t)
-
+        
+        # Write to video file
+        if video_path and state.running:
+            if video_writer is None:
+                fh, fw = disp.shape[:2]
+                try: 
+                    fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+                    video_writer = cv2.VideoWriter(video_path, fourcc, 30.0, (fw, fh))
+                    print(f"[Producer] Recording to {video_path}")
+                except Exception as e:
+                    print(f"[Producer] Video Writer Error: {e}")
+                    video_writer = None 
+            
+            if video_writer is not None and video_writer.isOpened():
+                video_writer.write(disp)
+        
         time.sleep(0.005)
 
-    cap.release()
+    # Cleanup
+    if cap.isOpened():
+        cap.release()
+    if video_writer is not None and video_writer.isOpened():
+        video_writer.release()
+        print("[Producer] Video Saved.")
+    
     print("[Producer] Stopped.")

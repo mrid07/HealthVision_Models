@@ -1,5 +1,5 @@
 
-from flask import Flask, jsonify, render_template, Response
+from flask import Flask, jsonify, render_template, request, Response
 from engine.engine import start_engine, stop_engine
 import engine.state as state
 import cv2
@@ -17,8 +17,13 @@ def index():
 
 @app.route("/start", methods=["POST"])
 def start():
-    start_engine()
-    return jsonify({"status": "started"})
+    data = request.get_json(silent=True)
+    user_name = "Guest"
+    if data and "user_name" in data:
+        user_name = data["user_name"]
+        
+    start_engine(user_name=user_name)
+    return jsonify({"status": "started", "user": user_name})
 
 @app.route("/stop", methods=["POST"])
 def stop():
