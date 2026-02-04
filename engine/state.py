@@ -15,7 +15,7 @@ MAX_BUFFER_LEN = 3000
 
 # --- SHARED BUFFERS ---
 # Producer writes, Processor reads
-roi_signal = deque(maxlen=MAX_BUFFER_LEN)      # Stores per-frame green channel mean (or projected signal)
+roi_signal = deque(maxlen=MAX_BUFFER_LEN)      # Stores per-frame [R, G, B] means
 time_buffer = deque(maxlen=MAX_BUFFER_LEN)     # Stores timestamps
 fps_buffer = deque(maxlen=100) # Optional, for producer to smooth fps
 

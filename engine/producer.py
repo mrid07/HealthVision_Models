@@ -90,22 +90,24 @@ def frame_producer(video_source=0):
             if pixel_accumulator:
                 # Stack all pixels from all ROIs vertically
                 all_pixels = np.vstack(pixel_accumulator)
-                mean_rgb = np.mean(all_pixels, axis=0) # [B, G, R]
-                mean_rgb = mean_rgb[::-1] # [R, G, B]
-                roi_mean_scalar = mean_rgb[1] # Green channel
+                mean_bgr = np.mean(all_pixels, axis=0) # [B, G, R]
+                roi_mean_rgb = mean_bgr[::-1] # [R, G, B]
         
         # Update Shared State
         with lock:
             state.last_frame = disp
             
-            if roi_mean_scalar is not None:
-                 state.roi_signal.append(roi_mean_scalar)
+            if roi_mean_rgb is not None:
+                 state.roi_signal.append(roi_mean_rgb)
                  state.time_buffer.append(t)
             else:
                 # pad with last value or 0 to keep timing consistent
                 if len(state.roi_signal) > 0:
                     val = state.roi_signal[-1]
                     state.roi_signal.append(val)
+                else:
+                    # Initialize with zeros if buffer is empty
+                    state.roi_signal.append(np.array([0.0, 0.0, 0.0]))
         
         # Write to video file
         if video_path and state.running:

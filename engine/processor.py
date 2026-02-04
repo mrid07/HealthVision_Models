@@ -11,7 +11,8 @@ from engine.processing_utils import (
     bandpass_filter,
     detrend_zscore,
     compute_hrv_metrics_from_hr_series,
-    estimate_stress_and_calmness
+    estimate_stress_and_calmness,
+    pos_method
 )
 from engine.predictor import predict_metrics
 
@@ -67,8 +68,19 @@ def processing_loop():
 
         # --- PHASE 2: Signal Processing ---
         try:
-            # 1. Preprocessing
-            processed = detrend_zscore(window_sig)
+            # 1. Preprocessing (POS Algorithm)
+            # window_sig is (N, 3) array of [R, G, B]
+            if window_sig.ndim == 2 and window_sig.shape[1] == 3:
+                raw_pulse = pos_method(window_sig)
+            else:
+                # Fallback if dimensions are wrong (e.g. legacy data in buffer)
+                # Just take green channel (index 1) if possible
+                if window_sig.ndim == 2:
+                    raw_pulse = window_sig[:, 1]
+                else: 
+                    raw_pulse = window_sig
+
+            processed = detrend_zscore(raw_pulse)
             
             # (Optional) Bandpass for HR range
             fs_est = len(window_sig) / duration if duration > 0 else 30.0
