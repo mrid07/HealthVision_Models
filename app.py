@@ -15,6 +15,10 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
+@app.route("/math-stress")
+def math_stress():
+    return render_template("math_stress.html")
+
 @app.route("/start", methods=["POST"])
 def start():
     data = request.get_json(silent=True)

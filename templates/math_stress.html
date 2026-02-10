@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stress Induction Task - Math</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .split-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .monitor-panel, .task-panel {
+            flex: 1;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Task Specific Styles */
+        .math-display {
+            font-size: 3em;
+            text-align: center;
+            margin: 40px 0;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            background: #334155;
+            border: 2px solid #475569;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .timer-bar {
+            height: 10px;
+            background: #475569;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .timer-fill {
+            height: 100%;
+            background: #22c55e; /* Starts green */
+            width: 100%;
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+
+        .task-feedback {
+            text-align: center;
+            height: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .correct { color: #22c55e; }
+        .wrong { color: #ef4444; }
+
+        /* Compact Video */
+        .compact-video {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            min-height: 200px;
+            background: #000;
+        }
+        
+        .stress-indicator {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Stress Induction: Mental Arithmetic</h1>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="/" style="color: #94a3b8; text-decoration: none; font-size: 0.9em;">&larr; Back to Dashboard</a>
+    </div>
+
+    <!-- Global Controls -->
+    <div class="controls">
+        <input type="text" id="userName" placeholder="Enter Participant Name" style="padding: 10px; border-radius: 6px; border: 1px solid #ccc; width: 250px;">
+        <button id="startBtn">Start Task</button>
+        <button id="stopBtn">Stop Task</button>
+    </div>
+    
+    <div id="statusMessage" class="feedback">Ready to start.</div>
+
+    <div class="split-container">
+        <!-- Human Monitoring Panel -->
+        <div class="monitor-panel">
+            <h2>Physiological Monitor</h2>
+            <img id="videoFeed" class="compact-video" src="" alt="Camera Stream">
+            
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="metric">
+                    <span>Heart Rate</span>
+                    <p id="hrDisplay" style="font-size: 1.5em; color: #f43f5e;">--</p>
+                </div>
+                <div class="metric">
+                    <span>Breathing Rate</span>
+                    <p id="rrDisplay" style="font-size: 1.5em; color: #3b82f6;">--</p>
+                </div>
+            </div>
+            
+            <div id="stressBox" class="stress-indicator" style="background: #334155;">
+                Level: <span id="stressValue">Unknown</span>
+            </div>
+            <div style="text-align: center; margin-top: 10px; font-size: 0.9em; color: #94a3b8;">
+                SQI: <span id="sqiValue">--</span>
+            </div>
+        </div>
+
+        <!-- Stress Task Panel -->
+        <div class="task-panel">
+            <h2>Calculations</h2>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Score: <b id="scoreVal">0</b></span>
+                <span>Time Left: <b id="timeVal">--</b></span>
+            </div>
+
+            <div class="timer-bar">
+                <div id="timerFill" class="timer-fill"></div>
+            </div>
+
+            <div class="math-display" id="questionBox">? + ?</div>
+            
+            <input type="number" id="answerInput" class="answer-input" placeholder="Answer" disabled autocomplete="off">
+            <div id="mathFeedback" class="task-feedback"></div>
+            
+            <p style="color: #94a3b8; font-size: 0.9em; text-align: center; margin-top: 20px;">
+                Solve quickly to verify baseline. As difficulty increases, maintain accuracy.
+            </p>
+        </div>
+    </div>
+
+    <!-- Post-Session Analysis -->
+    <div id="resultsPanel" style="display: none; margin-top: 40px; text-align: center;">
+        <h2>Session Results</h2>
+        <div class="charts-container" style="display: flex; gap: 20px; height: 300px;">
+            <div class="chart-box" style="flex: 1; background: #1e293b; padding: 15px; border-radius: 12px;">
+                <canvas id="resultHrChart"></canvas>
+            </div>
+            <div class="chart-box" style="flex: 1; background: #1e293b; padding: 15px; border-radius: 12px;">
+                <canvas id="resultBpChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div style="display: flex; justify-content: center; gap: 40px; margin-top: 20px;">
+            <div style="background: #334155; padding: 15px 30px; border-radius: 8px;">
+                <h3 style="margin: 0 0 5px 0; color: #f43f5e;">Avg Heart Rate</h3>
+                <span id="avgHrDisplay" style="font-size: 1.5em; font-weight: bold;">--</span> bpm
+            </div>
+            <div style="background: #334155; padding: 15px 30px; border-radius: 8px;">
+                <h3 style="margin: 0 0 5px 0; color: #3b82f6;">Avg BP</h3>
+                <span id="avgBpDisplay" style="font-size: 1.5em; font-weight: bold;">--/--</span> mmHg
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="/static/math_stress.js"></script>
+</body>
+</html>
