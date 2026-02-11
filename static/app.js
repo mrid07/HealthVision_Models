@@ -5,6 +5,15 @@ const stopBtn = document.getElementById("stopBtn");
 const nameInput = document.getElementById("userName");
 const feedback = document.getElementById("feedback");
 
+// Session tracking for averages
+let sessionHistory = {
+    hr: [],
+    sys: [],
+    dia: [],
+    sys_new: [],
+    dia_new: []
+};
+
 // --- Charts Initialization ---
 const MAX_POINTS = 60; // Keep last 60 points
 
@@ -89,6 +98,51 @@ let bpChart = new Chart(bpChartCtx, {
     }
 });
 
+let bpNewChartCtx = document.getElementById('bpNewChart').getContext('2d');
+let bpNewChart = new Chart(bpNewChartCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            {
+                label: 'New Sys (mmHg)',
+                data: [],
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0)',
+                borderWidth: 2,
+                tension: 0.4
+            },
+            {
+                label: 'New Dia (mmHg)',
+                data: [],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0)',
+                borderWidth: 2,
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: { 
+                display: false,
+                grid: { color: '#334155' }
+            },
+            y: { 
+                beginAtZero: false,
+                grid: { color: '#334155' },
+                ticks: { color: '#94a3b8' }
+            }
+        },
+        plugins: {
+            legend: { labels: { color: '#e2e8f0' } }
+        },
+        animation: false
+    }
+});
+
 
 let pollingInterval = null;
 
@@ -115,8 +169,10 @@ startBtn.onclick = async () => {
         // Start video feed
         videoFeed.src = "/video_feed";
         
-        // Reset charts on start
+        // Reset charts and session data on start
         resetCharts();
+        sessionHistory = { hr: [], sys: [], dia: [], sys_new: [], dia_new: [] };
+        document.getElementById("sessionSummary").style.display = "none";
 
         // Start polling
         startPolling();
@@ -140,6 +196,9 @@ stopBtn.onclick = async () => {
         videoFeed.src = "";
         
         stopPolling();
+        
+        // Calculate and display session summary
+        displaySessionSummary();
         
     } catch (e) {
         console.error("Error stopping:", e);
@@ -176,6 +235,10 @@ async function updateMetrics() {
         const sys = data.sys ? data.sys.toFixed(0) : "--";
         const dia = data.dia ? data.dia.toFixed(0) : "--";
         document.getElementById("bp").innerText = `${sys}/${dia}`;
+
+        const sys_new = data.sys_new ? data.sys_new.toFixed(0) : "--";
+        const dia_new = data.dia_new ? data.dia_new.toFixed(0) : "--";
+        document.getElementById("bp_new").innerText = `${sys_new}/${dia_new}`;
         
         setText("sqi", data.sqi, 2);
         
@@ -183,6 +246,13 @@ async function updateMetrics() {
         setText("calmness", data.calmness_score, 2);
         
         document.getElementById("debugBox").innerText = JSON.stringify(data, null, 2);
+
+        // Collect session history for averages
+        sessionHistory.hr.push(data.hr !== undefined && data.hr !== null ? data.hr : null);
+        sessionHistory.sys.push(data.sys !== undefined && data.sys !== null ? data.sys : null);
+        sessionHistory.dia.push(data.dia !== undefined && data.dia !== null ? data.dia : null);
+        sessionHistory.sys_new.push(data.sys_new !== undefined && data.sys_new !== null ? data.sys_new : null);
+        sessionHistory.dia_new.push(data.dia_new !== undefined && data.dia_new !== null ? data.dia_new : null);
 
         // Update Charts
         updateCharts(data);
@@ -228,6 +298,20 @@ function updateCharts(data) {
     bpChart.data.datasets[0].data.push(sysVal);
     bpChart.data.datasets[1].data.push(diaVal);
     bpChart.update();
+
+    // -- BP NEW --
+    if (bpNewChart.data.labels.length > MAX_POINTS) {
+        bpNewChart.data.labels.shift();
+        bpNewChart.data.datasets.forEach(bs => bs.data.shift());
+    }
+    bpNewChart.data.labels.push(timeLabel);
+    
+    const sysNewVal = (data.sys_new && !isNaN(data.sys_new)) ? data.sys_new : null;
+    const diaNewVal = (data.dia_new && !isNaN(data.dia_new)) ? data.dia_new : null;
+    
+    bpNewChart.data.datasets[0].data.push(sysNewVal);
+    bpNewChart.data.datasets[1].data.push(diaNewVal);
+    bpNewChart.update();
 }
 
 function resetCharts() {
@@ -238,4 +322,34 @@ function resetCharts() {
     bpChart.data.labels = [];
     bpChart.data.datasets.forEach(d => d.data = []);
     bpChart.update();
+
+    bpNewChart.data.labels = [];
+    bpNewChart.data.datasets.forEach(d => d.data = []);
+    bpNewChart.update();
+}
+
+function displaySessionSummary() {
+    // Calculate averages from session history
+    const validHr = sessionHistory.hr.filter(x => x !== null && x !== undefined && !isNaN(x));
+    const validSys = sessionHistory.sys.filter(x => x !== null && x !== undefined && !isNaN(x));
+    const validDia = sessionHistory.dia.filter(x => x !== null && x !== undefined && !isNaN(x));
+    const validSysNew = sessionHistory.sys_new.filter(x => x !== null && x !== undefined && !isNaN(x));
+    const validDiaNew = sessionHistory.dia_new.filter(x => x !== null && x !== undefined && !isNaN(x));
+
+    const avgHr = validHr.length ? (validHr.reduce((a, b) => a + b, 0) / validHr.length).toFixed(1) : "--";
+    const avgSys = validSys.length ? (validSys.reduce((a, b) => a + b, 0) / validSys.length).toFixed(0) : "--";
+    const avgDia = validDia.length ? (validDia.reduce((a, b) => a + b, 0) / validDia.length).toFixed(0) : "--";
+    const avgSysNew = validSysNew.length ? (validSysNew.reduce((a, b) => a + b, 0) / validSysNew.length).toFixed(0) : "--";
+    const avgDiaNew = validDiaNew.length ? (validDiaNew.reduce((a, b) => a + b, 0) / validDiaNew.length).toFixed(0) : "--";
+
+    // Update summary display
+    document.getElementById("avgHr").innerText = avgHr + " bpm";
+    document.getElementById("avgBpOld").innerText = `${avgSys}/${avgDia} mmHg`;
+    document.getElementById("avgBpNew").innerText = `${avgSysNew}/${avgDiaNew} mmHg`;
+    
+    // Show summary section
+    document.getElementById("sessionSummary").style.display = "block";
+    
+    // Scroll to summary
+    document.getElementById("sessionSummary").scrollIntoView({ behavior: 'smooth' });
 }

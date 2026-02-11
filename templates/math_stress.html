@@ -130,6 +130,14 @@
                     <span>Breathing Rate</span>
                     <p id="rrDisplay" style="font-size: 1.5em; color: #3b82f6;">--</p>
                 </div>
+                <div class="metric">
+                    <span>BP (Old)</span>
+                    <p id="bpDisplay" style="font-size: 1.3em; color: #a855f7;">--/--</p>
+                </div>
+                <div class="metric">
+                    <span>BP (New)</span>
+                    <p id="bpNewDisplay" style="font-size: 1.3em; color: #10b981;">--/--</p>
+                </div>
             </div>
             
             <div id="stressBox" class="stress-indicator" style="background: #334155;">
@@ -166,12 +174,19 @@
     <!-- Post-Session Analysis -->
     <div id="resultsPanel" style="display: none; margin-top: 40px; text-align: center;">
         <h2>Session Results</h2>
-        <div class="charts-container" style="display: flex; gap: 20px; height: 300px;">
-            <div class="chart-box" style="flex: 1; background: #1e293b; padding: 15px; border-radius: 12px;">
-                <canvas id="resultHrChart"></canvas>
-            </div>
+        <!-- BP Models Side by Side -->
+        <div style="display: flex; gap: 20px; height: 300px; margin-bottom: 20px;">
             <div class="chart-box" style="flex: 1; background: #1e293b; padding: 15px; border-radius: 12px;">
                 <canvas id="resultBpChart"></canvas>
+            </div>
+            <div class="chart-box" style="flex: 1; background: #1e293b; padding: 15px; border-radius: 12px;">
+                <canvas id="resultBpNewChart"></canvas>
+            </div>
+        </div>
+        <!-- Heart Rate Below -->
+        <div style="height: 300px; margin-bottom: 20px;">
+            <div class="chart-box" style="background: #1e293b; padding: 15px; border-radius: 12px; height: 100%;">
+                <canvas id="resultHrChart"></canvas>
             </div>
         </div>
 
@@ -182,14 +197,18 @@
                 <span id="avgHrDisplay" style="font-size: 1.5em; font-weight: bold;">--</span> bpm
             </div>
             <div style="background: #334155; padding: 15px 30px; border-radius: 8px;">
-                <h3 style="margin: 0 0 5px 0; color: #3b82f6;">Avg BP</h3>
+                <h3 style="margin: 0 0 5px 0; color: #a855f7;">Avg BP (Old)</h3>
                 <span id="avgBpDisplay" style="font-size: 1.5em; font-weight: bold;">--/--</span> mmHg
+            </div>
+            <div style="background: #334155; padding: 15px 30px; border-radius: 8px;">
+                <h3 style="margin: 0 0 5px 0; color: #10b981;">Avg BP (New)</h3>
+                <span id="avgBpNewDisplay" style="font-size: 1.5em; font-weight: bold;">--/--</span> mmHg
             </div>
         </div>
     </div>
 
 </div>
 
-<script src="/static/math_stress.js"></script>
+<script src="/static/math_stress.js?v=2"></script>
 </body>
 </html>

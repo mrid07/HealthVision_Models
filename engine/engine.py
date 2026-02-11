@@ -34,7 +34,9 @@ def start_engine(user_name="Guest"):
     # Reset state? Maybe clear buffers?
     with state.lock:
         state.roi_signal.clear()
+        state.green_signal.clear()
         state.time_buffer.clear()
+        state.green_time_buffer.clear()
         state.hr_history.clear()
         state.current_data = {
             "timestamp": None,
@@ -42,6 +44,8 @@ def start_engine(user_name="Guest"):
             "rr": float('nan'),
             "sys": float('nan'),
             "dia": float('nan'),
+            "sys_new": float('nan'),
+            "dia_new": float('nan'),
             "sqi": 0.0,
             "calmness_score": 0.0,
             "stress_label": "Unknown",

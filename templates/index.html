@@ -37,7 +37,8 @@
     <div class="metrics">
         <div class="metric"><span>HR</span><p id="hr">--</p></div>
         <div class="metric"><span>RR</span><p id="rr">--</p></div>
-        <div class="metric"><span>BP (Sys/Dia)</span><p id="bp">--/--</p></div>
+        <div class="metric"><span>BP (Old)</span><p id="bp">--/--</p></div>
+        <div class="metric"><span>BP (New)</span><p id="bp_new">--/--</p></div>
         <div class="metric"><span>SQI</span><p id="sqi">--</p></div>
     </div>
     
@@ -48,11 +49,39 @@
 
     <!-- Charts -->
     <div class="charts-container">
-        <div class="chart-box">
-            <canvas id="hrChart"></canvas>
+        <!-- BP Models Side by Side -->
+        <div class="chart-row">
+            <div class="chart-box">
+                <canvas id="bpChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <canvas id="bpNewChart"></canvas>
+            </div>
         </div>
-        <div class="chart-box">
-            <canvas id="bpChart"></canvas>
+        <!-- Heart Rate Below -->
+        <div class="chart-row-full">
+            <div class="chart-box">
+                <canvas id="hrChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Summary -->
+    <div id="sessionSummary" class="session-summary" style="display: none;">
+        <h2>Session Summary</h2>
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Average Heart Rate</h3>
+                <p id="avgHr" class="summary-value" style="color: #f43f5e;">-- bpm</p>
+            </div>
+            <div class="summary-card">
+                <h3>Average BP (Old Model)</h3>
+                <p id="avgBpOld" class="summary-value" style="color: #ef4444;">--/-- mmHg</p>
+            </div>
+            <div class="summary-card">
+                <h3>Average BP (New Model)</h3>
+                <p id="avgBpNew" class="summary-value" style="color: #10b981;">--/-- mmHg</p>
+            </div>
         </div>
     </div>
 

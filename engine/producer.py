@@ -53,7 +53,8 @@ def frame_producer(video_source=0):
                 face_box = None
                 
         # ROI Extraction
-        roi_mean_scalar = None
+        roi_mean_rgb = None
+        frame_green_mean = np.mean(frame[:,:,1])
         disp = frame.copy()
         
         if face_box is not None:
@@ -97,17 +98,24 @@ def frame_producer(video_source=0):
         with lock:
             state.last_frame = disp
             
+            # Store whole frame green signal
+            state.green_signal.append(frame_green_mean)
+            state.green_time_buffer.append(t)
+
             if roi_mean_rgb is not None:
                  state.roi_signal.append(roi_mean_rgb)
                  state.time_buffer.append(t)
             else:
                 # pad with last value or 0 to keep timing consistent
+                # CRITICAL: Must also append timestamp to maintain buffer sync
                 if len(state.roi_signal) > 0:
                     val = state.roi_signal[-1]
                     state.roi_signal.append(val)
+                    state.time_buffer.append(t)  # ← FIX: Add timestamp
                 else:
                     # Initialize with zeros if buffer is empty
                     state.roi_signal.append(np.array([0.0, 0.0, 0.0]))
+                    state.time_buffer.append(t)  # ← FIX: Add timestamp
         
         # Write to video file
         if video_path and state.running:

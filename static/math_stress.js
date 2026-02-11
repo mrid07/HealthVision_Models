@@ -13,12 +13,15 @@ let sessionHistory = {
     labels: [],
     hr: [],
     sys: [],
-    dia: []
+    dia: [],
+    sys_new: [],
+    dia_new: []
 };
 
 // Charts
 let resultHrChart = null;
 let resultBpChart = null;
+let resultBpNewChart = null;
 
 // DOM Elements
 const startBtn = document.getElementById("startBtn");
@@ -29,6 +32,8 @@ const videoFeed = document.getElementById("videoFeed");
 
 const hrDisplay = document.getElementById("hrDisplay");
 const rrDisplay = document.getElementById("rrDisplay");
+const bpDisplay = document.getElementById("bpDisplay");
+const bpNewDisplay = document.getElementById("bpNewDisplay");
 const stressBox = document.getElementById("stressBox");
 const stressValue = document.getElementById("stressValue");
 const sqiValue = document.getElementById("sqiValue");
@@ -82,7 +87,7 @@ async function startSession() {
             
             // Reset Data
             sessionStartTime = Date.now();
-            sessionHistory = { labels: [], hr: [], sys: [], dia: [] };
+            sessionHistory = { labels: [], hr: [], sys: [], dia: [], sys_new: [], dia_new: [] };
             
             // Start Video Feed
             videoFeed.src = "/video_feed?" + new Date().getTime(); // timestamp to prevent caching
@@ -141,11 +146,22 @@ async function fetchMetrics() {
     try {
         const response = await fetch("/data");
         const data = await response.json();
+        
+        // Debug
+        // console.log("Data received:", data);
 
         // Update UI
         hrDisplay.innerText = (data.hr !== null && data.hr !== undefined) ? data.hr.toFixed(1) : "--";
         rrDisplay.innerText = (data.rr !== null && data.rr !== undefined) ? data.rr.toFixed(1) : "--";
         sqiValue.innerText = (data.sqi !== null && data.sqi !== undefined) ? data.sqi.toFixed(2) : "--";
+
+        let sys = (data.sys !== null && data.sys !== undefined) ? data.sys.toFixed(0) : "--";
+        let dia = (data.dia !== null && data.dia !== undefined) ? data.dia.toFixed(0) : "--";
+        if(bpDisplay) bpDisplay.innerText = `${sys}/${dia}`;
+
+        let sys_new = (data.sys_new !== null && data.sys_new !== undefined) ? data.sys_new.toFixed(0) : "--";
+        let dia_new = (data.dia_new !== null && data.dia_new !== undefined) ? data.dia_new.toFixed(0) : "--";
+        if(bpNewDisplay) bpNewDisplay.innerText = `${sys_new}/${dia_new}`;
 
         // Collect History
         const timeLabel = Math.floor((Date.now() - sessionStartTime) / 1000) + "s";
@@ -153,6 +169,8 @@ async function fetchMetrics() {
         sessionHistory.hr.push(data.hr !== undefined ? data.hr : null);
         sessionHistory.sys.push(data.sys !== undefined ? data.sys : null);
         sessionHistory.dia.push(data.dia !== undefined ? data.dia : null);
+        sessionHistory.sys_new.push(data.sys_new !== undefined ? data.sys_new : null);
+        sessionHistory.dia_new.push(data.dia_new !== undefined ? data.dia_new : null);
 
         // Stress Logic (Visual)
         const stress = data.stress_label || "Unknown";
@@ -311,11 +329,13 @@ function updateScore() {
 // --- Charting ---
 
 function renderResults() {
-    if(resultsPanel) resultsPanel.style.display = "block";
-    
-    // Destroy existing charts if any
-    if (resultHrChart) resultHrChart.destroy();
-    if (resultBpChart) resultBpChart.destroy();
+    try {
+        if(resultsPanel) resultsPanel.style.display = "block";
+        
+        // Destroy existing charts if any
+        if (resultHrChart) resultHrChart.destroy();
+        if (resultBpChart) resultBpChart.destroy();
+        if (resultBpNewChart) resultBpNewChart.destroy();
     
     // HR Chart
     const ctxHr = document.getElementById('resultHrChart').getContext('2d');
@@ -351,16 +371,49 @@ function renderResults() {
             labels: sessionHistory.labels,
             datasets: [
                 {
-                    label: 'Systolic',
+                    label: 'Sys (Old)',
                     data: sessionHistory.sys,
-                    borderColor: '#ef4444',
+                    borderColor: '#a855f7',
                     borderWidth: 2,
                     tension: 0.3
                 },
                 {
-                    label: 'Diastolic',
+                    label: 'Dia (Old)',
                     data: sessionHistory.dia,
-                    borderColor: '#3b82f6',
+                    borderColor: '#d8b4fe',
+                    borderWidth: 2,
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { grid: { color: '#334155' } },
+                y: { grid: { color: '#334155' } }
+            }
+        }
+    });
+
+    // BP New Chart
+    const ctxBpNew = document.getElementById('resultBpNewChart').getContext('2d');
+    resultBpNewChart = new Chart(ctxBpNew, {
+        type: 'line',
+        data: {
+            labels: sessionHistory.labels,
+            datasets: [
+                {
+                    label: 'Sys (New)',
+                    data: sessionHistory.sys_new,
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    tension: 0.3
+                },
+                {
+                    label: 'Dia (New)',
+                    data: sessionHistory.dia_new,
+                    borderColor: '#6ee7b7',
                     borderWidth: 2,
                     tension: 0.3
                 }
@@ -383,15 +436,28 @@ function renderResults() {
      const validHr = sessionHistory.hr.filter(x => x !== null && x !== undefined && !isNaN(x));
      const validSys = sessionHistory.sys.filter(x => x !== null && x !== undefined && !isNaN(x));
      const validDia = sessionHistory.dia.filter(x => x !== null && x !== undefined && !isNaN(x));
+     
+     const validSysNew = sessionHistory.sys_new.filter(x => x !== null && x !== undefined && !isNaN(x));
+     const validDiaNew = sessionHistory.dia_new.filter(x => x !== null && x !== undefined && !isNaN(x));
  
      const avgHr = validHr.length ? (validHr.reduce((a, b) => a + b, 0) / validHr.length).toFixed(1) : "--";
      const avgSys = validSys.length ? (validSys.reduce((a, b) => a + b, 0) / validSys.length).toFixed(0) : "--";
      const avgDia = validDia.length ? (validDia.reduce((a, b) => a + b, 0) / validDia.length).toFixed(0) : "--";
+     
+     const avgSysNew = validSysNew.length ? (validSysNew.reduce((a, b) => a + b, 0) / validSysNew.length).toFixed(0) : "--";
+     const avgDiaNew = validDiaNew.length ? (validDiaNew.reduce((a, b) => a + b, 0) / validDiaNew.length).toFixed(0) : "--";
  
      // Update DOM
      const avgHrEl = document.getElementById("avgHrDisplay");
      const avgBpEl = document.getElementById("avgBpDisplay");
+     const avgBpNewEl = document.getElementById("avgBpNewDisplay");
      
      if(avgHrEl) avgHrEl.innerText = avgHr;
      if(avgBpEl) avgBpEl.innerText = `${avgSys}/${avgDia}`;
+     if(avgBpNewEl) avgBpNewEl.innerText = `${avgSysNew}/${avgDiaNew}`;
+
+    } catch(e) {
+        console.error("Error rendering results:", e);
+        alert("Error rendering results: " + e.message);
+    }
 }

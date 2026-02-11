@@ -16,7 +16,9 @@ MAX_BUFFER_LEN = 3000
 # --- SHARED BUFFERS ---
 # Producer writes, Processor reads
 roi_signal = deque(maxlen=MAX_BUFFER_LEN)      # Stores per-frame [R, G, B] means
-time_buffer = deque(maxlen=MAX_BUFFER_LEN)     # Stores timestamps
+green_signal = deque(maxlen=MAX_BUFFER_LEN)    # Stores per-frame Green mean (whole frame)
+time_buffer = deque(maxlen=MAX_BUFFER_LEN)     # Stores timestamps for roi_signal
+green_time_buffer = deque(maxlen=MAX_BUFFER_LEN) # Stores timestamps for green_signal
 fps_buffer = deque(maxlen=100) # Optional, for producer to smooth fps
 
 # Last frame for streaming (Producer writes, App reads)
@@ -30,6 +32,8 @@ current_data = {
     "rr": np.nan,
     "sys": np.nan,
     "dia": np.nan,
+    "sys_new": np.nan, 
+    "dia_new": np.nan,
     "sqi": 0.0,
     "calmness_score": 0.0,
     "stress_label": "Unknown",

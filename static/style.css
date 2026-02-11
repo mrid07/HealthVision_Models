@@ -123,16 +123,73 @@ pre {
 /* Charts */
 .charts-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 20px;
     margin-bottom: 20px;
 }
 
+.chart-row {
+    display: flex;
+    gap: 20px;
+}
+
+.chart-row-full {
+    display: flex;
+}
+
 .chart-box {
     flex: 1;
-    min-width: 400px;
     background: #1e293b;
     padding: 15px;
     border-radius: 10px;
+    min-height: 300px;
+}
+
+/* Session Summary */
+.session-summary {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.session-summary h2 {
+    margin-top: 0;
+    color: #e2e8f0;
+    text-align: center;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.summary-card {
+    background: #334155;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.summary-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9em;
+    color: #94a3b8;
+    font-weight: normal;
+}
+
+.summary-value {
+    margin: 0;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.analysis {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
